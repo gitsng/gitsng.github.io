@@ -1,0 +1,1268 @@
+<html>
+<head>
+<title>Java notes</title>
+<link href="card-style.css" rel="stylesheet" />
+</head>
+<body>
+<div class="card">
+<h3>Defining a class</h3>  
+<pre>
+Hello.java
+
+class Hello {
+}
+</pre>
+<p>By convention, a class is defined inside a file whose name is same as the classname and extension is <strong>.java</strong></p>
+</div>
+
+<div class="card">
+<h3>Package</h3>
+<p>Package is used to group classes inside a namespace. To refer to the classname, we have to use the fully qualified name which is <strong>packagename.classname</strong>.
+This way, we avoid class name collision since two different packages can have classes with same name.</p>
+<p>To define a class inside a package, we use the declaration <strong>package packagename;</strong> and this must be the first non-comment statement in the file.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+src/learn/java/Hello.java
+
+package learn.java;
+
+class Hello {
+}
+</pre>
+<p>By convention, the files are placed inside a folder structure that reflects the package name with <strong>.</strong> interpreted as create a new subfolder.</p>
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>If there is no <strong>package</strong> declaration, the class is still inside a package, the global <strong>unnamed</strong> package.</p>
+<pre>
+src/Main.java
+
+class Main {
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>The static main method</h3>
+<p>The method called <strong>main</strong> is the entry point of a Java program.</p>
+<pre>
+src/Main.java
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Compiling</h3>
+<pre>
+learn-java$ javac src/Main.java
+</pre>
+<p>This creates the file <strong>Main.class</strong> that has the binary code for the class Main. By default, it will placed in the same folder where the <strong>.java</strong> file
+is placed.</p>
+<pre>
+src
+|_ Main.class
+</pre>
+</div>
+
+<div class="card">
+<h3>Custom destination for class file</h3>
+<p>To create the class file in a different folder, say <strong>classes</strong>, we can use the <strong>-d classfoldername</strong> option. The .class file will be placed under
+<strong>classfoldername</strong>folder if there is no <strong>package</strong> declaration. If there is package declaration, then the .class file is placed in
+<strong>classfoldername/package/subfolder</strong>folder.</p>
+<p>First remove <strong>src/Main.class</strong></p>
+<pre>
+learn-java$ javac -d classes src/Main.java
+learn-java$ javac -d classes src/learn/java/Hello.java
+</pre>
+<pre>
+classes
+|_ Main.class
+|_ learn
+    |_ java
+        |_ Hello.class
+</pre>
+</div>
+
+<div class="card">
+<h3>Running a Java program</h3>
+<p>To run a Java code, specify the name of the class that has the <strong>main</strong> method.</p>
+<pre>
+learn-java$ java Main
+</pre>
+<p>The class file has to be in the current folder. Otherwise we get the error:</p>
+<pre>
+Error: Could not find or load main class Main
+</pre>
+<p>In such a case, specify the folders where the class files are placed. In our case, it is <strong>classes</strong> folder under the current folder.</p>
+<pre>
+learn-java$ java -cp classes Main
+</pre>
+<pre>
+Hello
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>If the class with the main method is inside a package, we have to specify the package qualified classname.</p>
+<pre>
+src/learn/java/Hello.java
+
+package learn.java;
+
+class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello there");
+    }
+}
+</pre>
+<pre>
+learn-java$ javac -d classes src/learn/java/Hello.java
+learn-java$ java -cp classes learn.java.Hello
+</pre>
+<pre>
+Hello there
+</pre>
+</div>
+
+<div class="card">
+<h3>Detour Compilation and class dependency</h3>
+<pre>
+src/Main.java
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+        Hello h = null;
+    }
+}
+</pre>
+<p>We are using the class <strong>Hello</strong> so that must be compiled first.</p>
+<pre>
+javac -d classes src/learn/java/Hello.java
+javac -d classes src/Main.java
+</pre>
+<pre>
+src/Main.java:4: error: cannot find symbol
+Hello h = null;
+symbol:   class Hello
+location: class Main
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>While compiling, we need to specify the folders where the class files are placed else javac will not understand the class names we use in our code.</p>
+<pre>
+javac -cp classes -d classes src/Main.java
+</pre>
+<pre>
+src/Main.java:4: error: cannot find symbol
+Hello h = null;
+symbol:   class Hello
+location: class Main
+</pre>
+</div>
+
+<div class="card">
+<h3>Refer to a class declared inside a package</h3>
+<p>Eiher we have to specify the fully qualified class name or we need to <strong>import</strong> the package.</p>
+<pre>
+src/Main.java
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+        learn.java.Hello h = null;
+    }
+}
+</pre>
+<pre>
+javac -cp classes -d classes src/Main.java
+</pre>
+<pre>
+error: Hello is not public in learn.java; 
+cannot be accessed from outside package
+learn.java.Hello h = null;
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Or use import statement</p>
+<pre>
+src/Main.java
+
+import learn.java.*;
+
+class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+        Hello h = null;
+    }
+}
+</pre>
+<pre>
+javac -cp classes -d classes src/Main.java
+</pre>
+<pre>
+error: cannot find symbol
+Hello h = null;
+symbol:   class Hello
+location: class Main
+</pre>
+</div>
+
+<div class="card">
+<h3>Package and class visibility</h3>
+<p>Classes inside the same package are visible to each other but not to classes in other packages unless the class is declared public.</p>
+<pre>
+src/learn/java/Hello.java
+
+package learn.java;
+
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello there");
+    }
+}
+</pre>
+<pre>
+javac -d classes src/learn/java/Hello.java
+javac -cp classes -d classes src/Main.java
+</pre>
+</div>
+
+<hr>
+
+
+
+
+
+<div class="card">
+<h3>Declaring variable inside a function</h3>
+<p>The format is <strong>type variable-name</strong> followed by optional assignment, followed by <strong>;</strong></p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        int age = 5;
+        Hello h = null;
+    }
+}
+</pre>
+<p>Here <strong>int</strong> is primitive type and <strong>Hello</strong> is class type.</p>
+</div>
+
+<div class="card">
+<h3>Primitive types</h3>
+<p><strong>boolean</strong> just true and false</p>
+<p><strong>byte</strong> 1 byte, range -128 to 127</p>
+<p><strong>short</strong> 2 bytes, range -32768 to 32767</p>
+<p><strong>int</strong> 4 bytes, range -2147483648 to 2147483647.</p>
+<p><strong>long</strong> 8 bytes, range -9223372036854775808 to 9223372036854775807</p>
+<p><strong>float</strong> 32 bits single precision floating point number, range 1.4E-45 to 3.4028235E38</p>
+<p><strong>double</strong> 64 bits double precision floating point number, range 4.9E-324 to 1.7976931348623157E308</p>
+<p>By default, a decimal number literal is treated as double.</p>
+<p><strong>char</strong> 2 byte unicode value representing a single character</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+public class Main {
+    public static void main(String[] args) {
+        byte min = Byte.MIN_VALUE;
+        byte max = Byte.MAX_VALUE;
+        System.out.println(min);
+        System.out.println(max);
+    }
+}
+</pre>
+<p>Here <strong>Byte</strong> is a wrapper class for the primitive type <strong>byte</strong>.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>   
+<p>By default, a whole number literal is treated as integer with range check when we assign it to a variable of numeric type.</p>
+<pre>
+short x = 12;
+System.out.println(x);
+</pre>
+<p>So even though <strong>12</strong> is treated as int, the value is small enough to be stored in <strong>short</strong> type variable.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+long x = 9223372036854775806;
+System.out.println(x);
+</pre>
+<p>Here, although <strong>9223372036854775806</strong> will fit inside the <strong>long</strong> type variable, Java complains.</p>
+<pre>
+error: integer number too large
+</pre>
+<p>This can be solved with:</p>
+<pre>
+long x = 9223372036854775806L;
+System.out.println(x);
+</pre>
+</div>
+
+<div class="card">
+<h3>Casting</h3>
+<p>Consider this:</p>
+<pre>
+byte x = -128;
+byte result = x / 2;
+</pre>
+<pre>
+error: incompatible types: possible lossy 
+conversion from int to byte
+</pre>
+<p>We can solve it by <strong>casting</strong> to <strong>byte</strong>.</p>
+<pre>
+byte x = -128;
+byte result = (byte)(x / 2);
+</pre>
+</div>
+
+<div class="card">
+<h3>Integer division</h3>
+<pre>
+int x = 5;
+float result = x / 2;
+System.out.println(result);
+</pre>
+<pre>
+2.0
+</pre>
+<p>This happens because if numerator and denominator are both integer, Java performs integer division. To, rectify this, cast a number to float.</p>
+<pre>
+int x = 5;
+float result = (float)x / 2;
+System.out.println(result);
+</pre>
+<pre>
+2.5
+</pre>
+<p>In fact, if we are to work with decimal values, it is better to use double data type.</p>
+</div>
+
+<div class="card">
+<h3>Single character with char</h3>
+<p>To represent a char literal, we use single quote. We can also use unicode value using <strong>\uxxxx</strong></p>
+<pre>
+public class Hello {
+    public static void main(String[] args) {
+        char c = 'c';
+        System.out.println(c);
+        char unicodeChar = '\u099D';
+        System.out.println(unicodeChar);
+    }
+}
+</pre>
+<pre>
+c
+ঝ
+</pre>
+</div>
+
+<div class="card">
+<h3>The String class</h3>
+<p>Anything inside double quotes is a string. So we can have:</p>
+<pre>
+String my_string = "This is a string";
+</pre>
+</div>
+
+<hr>
+
+<div class="card">
+<h3>Collection of items with array</h3>
+<p>Array is a fixed sized collection of similar items where each item can be accessed using an integer value called <strong>index</strong>.</p>
+<p>Array type variable is declared as <strong>item-type[] var name</strong> and it is just holds a reference to an array object.</p>
+<p>Create an array object with <strong>new item-type[size]</strong> or with initialization <strong>{ items separated by comma }</strong>.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Here is a simple declaration</p>
+<pre>
+ int[] nums;
+</pre>
+<p>Declaration with array object creation.</p>
+<pre>
+int[] nums = new int[3];
+</pre>
+<p>Initialization</p>
+<pre>
+ int[] nums = {1, 3, 7};
+</pre>
+</div>
+
+<hr>
+
+<div class="card">
+<h3>Decision with if</h3>
+<p>The basic usage is</p>
+<pre>
+if (boolean expression / variable) statement if the condition is true;
+else statement if the condition is false (optional);
+</pre>
+<p><strong>Note</strong> it is <strong>statement</strong> and not <strong>statements</strong>. So if you want to execute multiple statements, you have to use
+<strong>statement block</strong>.</p>
+<pre>
+if (boolean expression / variable) {
+    statement 1;
+    statement 2;
+} else {
+    statement 1;
+    statement 2;
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        int age = 5;
+        
+        if(age &lt; 5) {
+            System.out.println("Too young");
+        } else {
+            System.out.println("Can start school");
+        }
+    }
+}
+</pre>
+<pre>
+Can start school
+</pre>
+</div>
+
+<div class="card">
+<h3>Statement block and variable declaration</h3>
+<p>Variables declared inside a statement block is not accessible outside the block.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        {
+            int age = 5;
+        }
+        if(age &lt; 5) {
+            System.out.println("Too young");
+        } else {
+            System.out.println("Can start school");
+        }
+    }
+}
+</pre>
+<pre>
+error: cannot find symbol
+if(age &lt; 5) {
+symbol:   variable age
+</pre>
+</div>
+
+<div class="card">
+<h3>Ternary operator ? :</h3>
+<p>This is used to return a value based on a condition.</p>
+<pre>
+condition / boolean variable ? value if condition is true : value if condition is false;
+</pre>
+<p>We can also use expression that produce a value.</p>
+<p>The previous code can be written as</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        int age = 5;
+
+        String verdict = (age &lt; 5) ? "Too young" : "Can start school";
+        System.out.println(verdict);
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Decision based on different different values of a variable with switch</h3>
+<pre>
+switch(var name) {
+    case value1:
+        statement1;
+        statement2;
+        break;
+    case value2:
+        statement3;
+        statement4;
+        break;
+    default:
+        statement5;
+        statement6;
+}
+</pre>
+<p>The <strong>var</strong> can be of type <strong>char</strong>, <strong>int</strong> or <strong>String</strong>.</p>
+<p>If the variable has value1, statement1, statement2 are executed, then <strong>break</strong> instructs the code to exit the switch block.</p>
+<p>If the variable has value2, statement3, statement4 are executed, then <strong>break</strong> instructs the code to exit the switch block.</p>
+<p>Otherwise, the statements labelled as <strong>default</strong> are executed and then the code exits the switch block.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        char grade = 'a';
+        switch(grade){
+            case 'a':
+                System.out.println("grade is a");
+                System.out.println("congratulation");
+                break;
+            case 'b':
+                System.out.println("grade is b");
+                System.out.println("nice");
+                break;
+            default:
+                System.out.println("grade is not a or b");
+                System.out.println("ok");
+        }
+    }
+}
+</pre>
+<pre>
+grade is a
+congratulation
+</pre>
+</div>
+
+<div class="card">
+<h3>As long as a condition is true, repeat with while</h3>
+<pre>
+while(condition) statement;
+</pre>
+<p>For multiple statements, use statement block</p>
+<pre>
+while(condition) {
+    statement 1;
+    statement 2;
+}
+</pre>
+<p>Before each execution, the <strong>condition</strong> is evaluated. If the result is <strong>true</strong>, only then the loop body is executed and 
+    the condition is evaluated again for the next iteration.</p>
+<p>We can use <strong>break</strong> statement to break out of the loop body and the looping.</p>
+</div>
+
+<div class="card">
+<h3>Repeat, as long as a condition is true with do while</h3>
+<pre>
+do statement while(condition);
+</pre>
+<pre>
+do {
+    statement 1;
+    statement 2;
+} while(condition);
+</pre>
+<p>After an execution, the <strong>condition</strong> is evaluated. If the result is <strong>true</strong>, only then the loop body is executed again. So, the loop 
+    body is executed at least once.</p>
+</div>
+
+<div class="card">
+<h3>Classic for loop</h3>
+<pre>
+for(initialization; condition; step) statement;
+</pre>
+<pre>
+for(initialization; condition; step) {
+    statement 1;
+    statement 2;
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Array and for loop</h3>
+<p>If we want to loop through all the elements then we can use <strong>for(item-type var name: array name) statement;</strong></p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        int[] nums = {1, 3, 7};
+        for(int num : nums) System.out.println(num);
+    }
+}
+</pre>
+<pre>
+1
+3
+7
+</pre>
+</div>
+
+<hr>
+
+<div class="card">
+<h3>Declaring class with placeholder for types</h3>
+<pre>
+class Cup&lt;T&gt;{
+    private T item;
+
+    public void put(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Using a generic class by specifying a type for the placeholder</h3>
+<p>To create an instance of <strong>Cup</strong> or to declare a variable of type <strong>Cup</strong>, we have to specify a concrete <strong>type</strong> for the
+<strong>type</strong> placeholder <strong>T</strong>.</p>
+<p>Suppose we have these two classes:</p>
+<pre>
+class Tea{
+    public String toString(){
+        return "Tea";
+    }
+}
+</pre>
+<pre>
+class Coffee{
+    public String toString(){
+        return "Coffee";
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>We can have:</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; t = new Cup&lt;Tea&gt;();
+        Tea tea = new Tea();
+        t.put(tea);
+        System.out.println(t.get());
+
+        Cup&lt;Coffee&gt; c = new Cup&lt;Coffee&gt;();
+        Coffee coffee = new Coffee();
+        c.put(coffee);
+        System.out.println(c.get());
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Behind the scene</h3>
+<p>Basically, imagine that we have the following:</p>
+<pre>
+class Cup&lt;Tea&gt;{
+    private Tea item;
+
+    public void put(Tea item){
+        this.item = item;
+    }
+
+    public Tea get(){
+        return item;
+    }
+}
+</pre>
+<p>So we cannot do this:</p>
+<pre>
+Coffee coffee = new Coffee();
+t.put(coffee);
+</pre>
+<pre>
+error: incompatible types: Coffee cannot be
+converted to Tea
+t.put(coffee);
+</pre>
+</div>
+
+<div class="card">
+<h3>Generic type and polymorphism</h3>
+<p>When we use the concrete type <strong>Cup&lt;Tea&gt;</strong>, the <strong>put</strong> becomes <strong>put(Tea item)</strong> and we can pass objects of type
+<strong>Tea</strong> or objects which are subtypes of <strong>Tea</strong>.</p>
+<pre>
+class IcedTea extends Tea{
+    public String toString(){
+        return "Iced tea";
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; t = new Cup&lt;Tea&gt;();
+        IcedTea icedTea = new IcedTea();
+        t.put(icedTea);
+        System.out.println(t.get());
+    }
+}
+</pre>
+<pre>
+Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>Concrete type of generic class as method parameter</h3>
+<p>Suppose we have this:</p>
+<pre>
+class TeaDrinker{
+    public static void offer(Cup&lt;Tea&gt; cupOfTea){
+        System.out.println("drinking cup of " + cupOfTea.get());
+    }
+}
+</pre>
+<p>We can create <strong>Cup&lt;Tea&gt;</strong> object, put <strong>IcedTea</strong> and offer to the drinker.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; tc = new Cup&lt;Tea&gt;();
+        IcedTea icedTea = new IcedTea();
+        tc.put(icedTea);
+        TeaDrinker.offer(tc);
+    }
+}
+</pre>
+<pre>
+drinking cup of Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>Passing concrete type where the type is a subclass</h3>
+<p>We may think that we can pass instance of concrete class <strong>Cup&lt;IcedTea&gt;</strong> because <strong>IcedTea</strong> is a 
+    kind of <strong>Tea</strong>. Turns out that <strong>Cup&lt;IcedTea&gt;</strong> is not treated as sub type of <strong>Cup&lt;Tea&gt;</strong></p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;IcedTea&gt; tc = new Cup&lt;IcedTea&gt;();
+        IcedTea icedTea = new IcedTea();
+        tc.put(icedTea);
+        TeaDrinker.offer(tc);
+    }
+}
+</pre>
+<pre>
+incompatible types: Cup&lt;IcedTea&gt; cannot be converted to Cup&lt;Tea&gt;
+TeaDrinker.offer(tc);
+</pre>
+</div>
+
+<div class="card">
+<h3>Method with generic parameter inside a non generic class</h3>
+<p>Our <strong>TeaDrinker</strong> class is a non-parameterized class and so we have to use a concrete type of <strong>Cup</strong>.</p>
+<pre>
+class TeaDrinker{
+    public static void offer(Cup&lt;T&gt; cupOfTea){
+        System.out.println("drinking cup of " + cupOfTea.get());
+    }
+}
+</pre>
+<pre>
+cannot find symbol
+public static void offer(Cup&lt;T&gt; cupOfTea){
+</pre>
+
+<p>We can specify that our method will use a type placeholder by declaring the placeholder before the method name </p>
+<pre>
+class TeaDrinker{
+    public static &lt;T&gt; void offer(Cup&lt;T&gt; cupOfTea){
+        System.out.println("drinking cup of " + cupOfTea.get());
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>This works but the problem with parameter of type <strong>Cup&lt;T&gt;</strong> is that we can pass any type of <strong>Cup</strong> which will have item other
+than <strong>Tea</strong>.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;();
+        Coffee coffee = new Coffee();
+        coffeeCup.put(coffee);
+        TeaDrinker.offer(coffeeCup);
+    }
+}
+</pre>
+<pre>
+drinking cup of Coffee
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>To restrict the method to accept <strong>Cup</strong> of type <strong>Tea</strong>, we need to specify that when we declare the type parameter.</p>
+<pre>
+class TeaDrinker{
+    public static &lt;T extends Tea&gt; void offer(Cup&lt;T&gt; cupOfTea){
+        System.out.println("drinking cup of " + cupOfTea.get());
+    }
+}
+</pre>
+<p>Now we will get compilation error.</p>
+<pre>
+method offer in class TeaDrinker cannot be applied to given types;
+TeaDrinker.offer(coffeeCup);
+required: Cup&lt;T&gt;
+  found: Cup&lt;Coffee&gt;
+  reason: inference variable T has incompatible bounds
+    equality constraints: Coffee
+    upper bounds: Tea
+  where T is a type-variable:
+    T extends Tea declared in method &lt;T&gt;offer(Cup&lt;T&gt;)
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>And now we can offer different concrete types of <strong>Cup</strong></p>
+<pre>
+class IcedTea extends Tea{
+    public String toString(){
+        return "Iced tea";
+    }
+}
+
+class LemonTea extends Tea{
+    public String toString(){
+        return "Lemon tea";
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;IcedTea&gt; icedTeaCup = new Cup&lt;IcedTea&gt;();
+        IcedTea icedTea = new IcedTea();
+        icedTeaCup.put(icedTea);
+        TeaDrinker.offer(icedTeaCup);
+
+        Cup&lt;LemonTea&gt; lemonTeaCup = new Cup&lt;LemonTea&gt;();
+        LemonTea lemonTea = new LemonTea();
+        lemonTeaCup.put(lemonTea);
+        TeaDrinker.offer(lemonTeaCup);
+    }
+}
+</pre>
+<pre>
+drinking cup of Iced tea
+drinking cup of Lemon tea
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>This also works with <strong>interface</strong>. Suppose we have:</p>
+<pre>
+interface Drinkable{
+    void drink();
+}
+
+class Tea implements Drinkable{
+    public void drink(){
+        System.out.println("drinking tea");;
+    }
+}
+
+class Coffee implements Drinkable{
+    public void drink(){
+        System.out.println("drinking coffee");;
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Our <strong>Drinker</strong> accepts any type of <strong>Cup</strong> as long as the concrete type is something <strong>Drinkable</strong>.</p>
+<pre>
+class Drinker{
+    public static &lt;T extends Drinkable&gt; void offer(Cup&lt;T&gt; cup){
+        cup.get().drink();
+    }
+}
+</pre>
+<p>Now we can do this:</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        Tea tea = new Tea();
+        teaCup.put(tea);
+        Drinker.offer(teaCup);
+
+        Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;();
+        Coffee coffee = new Coffee();
+        coffeeCup.put(coffee);
+        Drinker.offer(coffeeCup);
+    }
+}
+</pre>
+<pre>
+drinking tea
+drinking coffee
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>What happens if we have the following?</p>
+<pre>
+class Tea{
+    public void drink(){
+        System.out.println("drinking tea");;
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        Tea tea = new Tea();
+        teaCup.put(tea);
+        Drinker.offer(teaCup);
+    }
+}
+</pre>
+<p>We get compilation error</p>
+<pre>
+method offer in class Drinker cannot be applied to given types;
+Drinker.offer(teaCup);
+required: Cup&lt;T&gt;
+found: Cup&lt;Tea&gt;
+reason: inference variable T has incompatible bounds
+equality constraints: Tea
+upper bounds: Drinkable
+where T is a type-variable:
+T extends Drinkable declared in method &lt;T&gt;offer(Cup&lt;T&gt;)
+</pre>
+</div>
+
+<div class="card">
+<h3>Restrict the type parameter for a class</h3>
+<p>We can use the <strong>extends</strong> keyword when specifying the type placeholder for a class.</p>
+<pre>
+class Cup&lt;T extends Drinkable&gt;{
+    private T item;
+
+    public void put(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+</pre>
+<p>And now we cannot use any old type to create concrete <strong>Cup</strong> type.</p>
+<pre>
+class Tea{
+    public void drink(){
+        System.out.println("drinking tea");;
+    }
+}
+</pre>
+<pre>
+type argument Tea is not within bounds of type-variable T
+Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+where T is a type-variable:
+T extends Drinkable declared in class Cup
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>So we need to use type that implements the interface.</p>
+<pre>
+class Tea implements Drinkable{
+    public void drink(){
+        System.out.println("drinking tea");;
+    }
+}
+</pre>
+<p><strong>Note</strong> for our function, we have to use the following:</p>
+<pre>
+class Drinker{
+    public static &lt;T extends Drinkable&gt; void offer(Cup&lt;T&gt; cup){
+        cup.get().drink();
+    }
+}
+</pre>
+<p>We cannot do this:</p>
+<pre>
+class Drinker{
+    public static void offer(Cup&lt;T extends Drinkable&gt; cup){
+        cup.get().drink();
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Extending parameterized class</h3>
+<p>We have our class with a type placeholder:</p>
+<pre>
+class Cup&lt;T&gt;{
+    private T item;
+
+    public void put(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+</pre>
+<p>We cannot just <strong>extend</strong> this class:</p>
+<pre>
+class SippingCup extends Cup&lt;T&gt;{
+    public void sip(){
+        System.out.println("sipping " + get());
+    }
+}
+</pre>
+<pre>
+cannot find symbol
+class SippingCup extends Cup&lt;T&gt;{
+symbol: class T
+</pre>
+</div>
+
+<div class="card">
+<h3>The subclass must be parameterized</h3>
+<pre>
+class SippingCup&lt;T&gt; extends Cup&lt;T&gt;{
+    public void sip(){
+        System.out.println("sipping " + get());
+    }
+}
+</pre>
+<p>We will have to pass a specific type when declaring variable of type <strong>SippingCup</strong></p>
+<pre>
+class Tea{
+    public String toString(){
+        return "plain tea";
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        SippingCup&lt;Tea&gt; scup = new SippingCup&lt;Tea&gt;();
+        Tea tea = new Tea();
+        scup.put(tea);
+        scup.sip();
+    }
+}
+</pre>
+<pre>
+sipping plain tea
+</pre>
+</div>
+
+<hr>
+
+<div class="card">
+<h3>No standalone functions but</h3>
+<p>We cannot write standalone function in Java</p>
+<pre>
+void greet(String name){
+    System.out.println("Hello " + name);
+}
+</pre>
+<pre>
+class, interface, or enum expected
+void greet(String name){
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Let us try with a class:</p>
+<pre>
+class Greet{
+    public void greet(String name){
+        System.out.println("Hello " + name);
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        (new Greet()).greet("Java");
+    }
+}
+</pre>
+<pre>
+Hello Java
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>While this works, what if we want another <strong>greet</strong> function that prints <strong>Hi ...</strong>?</p>
+<p>We can define another class with greet method.</p>
+<pre>
+class GreetHi{
+    public void greet(String name){
+        System.out.println("Hi " + name);
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        (new Greet()).greet("Java");
+        (new GreetHi()).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Functional interface to the rescue</h3>
+<p>Creating classes just to write different implementation of the same function is tedious. Java offeres a better way using <strong>interface</strong> and compiler generated
+<strong>anonymous</strong> class.</p>
+<p>First we define an interface where we declare the signature of the function:</p>
+<pre>
+interface Greet{
+    void greet(String name);
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Then, instead of defining classes that implements the interface, we use the <strong>new</strong> keyword on the interface and also provide the body of the function
+declared in the interface.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        (new Greet() {
+            public void greet(String name){
+                System.out.println("Hello " + name);
+            }
+        }).greet("Java");
+
+        (new Greet() {
+            public void greet(String name){
+                System.out.println("Hi " + name);
+            }
+        }).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Behind the scene</h3>
+<p>Java generates anonymous class that implements the interface. It use the implementation of the function we profided:</p>
+<pre>
+class Main$1 implemnets Greet{
+    public void greet(String name){
+        System.out.println("Hello " + name);
+    }
+}
+</pre>
+<p>Then this class is used to create the object on which the method is called:</p>
+<pre>
+(new Main$1).greet("Java");
+</pre>
+<p>But this is still tedious, creating the two objects just so that we can call the method.</p>
+</div>
+
+<div class="card">
+<h3>Lambda</h3>
+<p>What we can do is use <strong>-&gt;</strong> notation to define a function and assign it to a variable of an interface type. Compiler will generate the anonymous class
+implementing the interface and create an object so that we can call the method using the variable.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greet hello = (String name)->System.out.println("Hello " + name);
+        Greet hi = (String name)->System.out.println("Hi " + name);
+        hello.greet("Java");
+        hi.greet("Java");
+    }
+}
+
+interface Greet{
+    void greet(String name);
+}
+</pre>
+<p>We can even use casting to provide hint to the compiler regarding which interface we want to use:</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        ((Greet)((String name)->System.out.println("Hello " + name))).greet("Java");
+        ((Greet)((String name)->System.out.println("Hi " + name))).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Functional interface</h3>
+<p>The <strong>@FunctionalInterface</strong> ensures that we only declare <strong>one</strong> method whose body we specify using the lambda notation.</p>
+<pre>
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+}
+</pre>
+<p>If you want to specify <strong>another</strong> function, then you will have to provide an implementation and mark the function as <strong>default</strong>, that
+is the function has default implementation which is to be used to generate the anonymous class.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greet h = (String name)->System.out.println("Hello " + name);
+        h.greet("Java");
+        h.greet();
+    }
+}
+
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+    default void greet(){
+        System.out.println("Hello");
+    }
+}
+</pre>
+<pre>
+Hello Java
+Hello
+</pre>
+</div>
+
+
+<div class="card" style="clear:both">
+<h3>Reference</h3>
+<ul>
+<li><a href="https://unicode-table.com/en/">Unicode table</a></li>
+<li><a href="ggg">hhhh</a></li>
+
+</ul>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+body {
+    padding:5px 5px 5px 5px;
+    margin:20px 20px 20px 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:14pt;
+    line-height: 30px;
+}
+pre {
+    font-family: monospace;
+    font-size: 12pt;
+    color:#777777;
+    line-height: 25px;
+}
+li {
+	margin:10px 0px 10px 0px;
+}
+.card {
+    float:left;
+    min-width:400px;
+    padding:10px 10px 10px 10px;
+    margin:5px 5px 5px 5px;
+    background-color: antiquewhite;
+}
+.card p {
+    max-width: 400px;
+}
+.card h3 {
+    max-width: 400px;
+}
+hr {
+    clear: both;
+}
