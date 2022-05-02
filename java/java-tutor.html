@@ -613,6 +613,169 @@ class Main {
 <hr>
 
 <div class="card">
+<h3>Function with body inside interface with static method</h3>
+<p>We can only specify <strong>abstract</strong> methods inside interface. If we specify a body, we get compilation error.</p>
+<pre>
+interface Greeter{
+    void greet(){
+        System.out.println("hello");
+    }
+}
+</pre>
+<pre>
+interface abstract methods cannot have body
+void greet(){
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>But if the method is declared as <strong>static</strong>, it can have a body, in fact it must have a body.</p>
+<pre>
+interface Greeter{
+    static void greet(){
+        System.out.println("hello");
+    }
+}
+</pre>
+<p>This can be called as <strong>interface-name.method-name</strong></p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+       Greeter.greet();
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p><strong>Note 1</strong> static method in interface is not inherited by a class that implements that interface.</p>
+<pre>
+class Welcome implements Greeter{
+
+}
+
+class Main{
+    public static void main(String[] args) {
+       Welcome.greet();
+    }
+}
+</pre>
+<pre>
+cannot find symbol
+symbol:   method greet()
+location: class Welcome
+</pre>
+</div>
+
+<div class="card">
+<h3>Function with body inside interface with default method</h3>
+<pre>
+interface Greeter{
+    default void greet(){
+        System.out.println("hello");
+    }
+}
+</pre>
+<p>Unlike <strong>static</strong> method in interface, <strong>default</strong> method cannot be called using the interface name. An object is required.</p>
+<p>The default method is <strong>inherited</strong> by the implementing class and we can use the object of the implementing class to call the method.</p>
+<pre>
+class Welcome implements Greeter{
+}
+
+class Main{
+    public static void main(String[] args) {
+        Welcome w = new Welcome();
+        w.greet();
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Overriding default method of interface</h3>
+<p>Just like any method inherited from a class, we can override default method.</p>
+<pre>
+class Welcome implements Greeter{
+    @Override
+    public void greet(){
+        System.out.println("welcome");
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        Welcome w = new Welcome();
+        w.greet();
+    }
+}
+</pre>
+<pre>
+welcome
+</pre>
+</div>
+
+<div class="card">
+<h3>Same default methods in multiple interfaces and the problem of multiple inherited methods</h3>
+<p>Suppose we have two interfaces with default methods having same signature:</p>
+<pre>
+interface Greeter{
+    default void greet(){
+        System.out.println("greetings");
+    }
+}
+
+interface Hello{
+    default void greet(){
+        System.out.println("hello");
+    }
+}
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>Now a class implements both the interfaces and inherits two methods with same signature. Which one should be used? Java takes the easy way out. Either
+provide an implementation to use by overriding the duplicate methods or get a compiler error.</p>
+<p>So this will produce a compiler error.</p>
+<pre>
+class Welcome implements Greeter, Hello{
+}
+</pre>
+<pre>
+class Welcome inherits unrelated defaults 
+for greet() from types Greeter and Hello
+</pre>
+</div>
+
+<div class="card">
+<h3>Provide your own implementation</h3>
+<pre>
+class Welcome implements Greeter, Hello{
+    @Override
+    public void greet(){
+        System.out.println("welcome");
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        Welcome w = new Welcome();
+        w.greet();
+    }
+}
+</pre>
+<p>Now there is no confusion. When <strong>greet()</strong> is called on object of class <strong>Welcome</strong>, the implementation in the Welcome class
+will be used.</p>
+<pre>
+welcome
+</pre>
+</div>
+
+
+<hr>
+
+<div class="card">
 <h3>Declaring class with placeholder for types</h3>
 <pre>
 class Cup&lt;T&gt;{
@@ -1222,14 +1385,30 @@ class Main{
 
 <div class="card">
 <h3>Functional interface</h3>
-<p>The <strong>@FunctionalInterface</strong> ensures that we only declare <strong>one</strong> method whose body we specify using the lambda notation.</p>
+<p>The <strong>@FunctionalInterface</strong> annotation ensures that we only declare <strong>one</strong> method whose body we specify using the lambda notation.</p>
 <pre>
 @FunctionalInterface
 interface Greet{
     void greet(String name);
 }
 </pre>
-<p>If you want to specify <strong>another</strong> function, then you will have to provide an implementation and mark the function as <strong>default</strong>, that
+<p>Specifying another abstract method results in compilation error.</p>
+<pre>
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+    void greet();
+}
+</pre>
+<pre>
+Unexpected @FunctionalInterface annotation
+Greet is not a functional interface
+multiple non-overriding abstract methods found in interface Greet
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>If you do want to specify <strong>another</strong> function, then you will have to provide an implementation and mark the function as <strong>default</strong>, that
 is the function has default implementation which is to be used to generate the anonymous class.</p>
 <pre>
 class Main{
@@ -1259,6 +1438,10 @@ Hello
 <h3>Reference</h3>
 <ul>
 <li><a href="https://unicode-table.com/en/">Unicode table</a></li>
+<li><a href="https://beginnersbook.com/2017/10/java-8-interface-changes-default-method-and-static-method/">Java 8 Interface Changes – default method and static method</a></li>
+<li><a href="https://www.javatpoint.com/java-8-functional-interfaces">Java Functional Interfaces</a></li>
+<li><a href="ggg">hhhh</a></li>
+
 <li><a href="ggg">hhhh</a></li>
 
 </ul>
