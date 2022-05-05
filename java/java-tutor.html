@@ -776,6 +776,194 @@ welcome
 <hr>
 
 <div class="card">
+<h3>No standalone functions but</h3>
+<p>We cannot write standalone function in Java</p>
+<pre>
+void greet(String name){
+    System.out.println("Hello " + name);
+}
+</pre>
+<pre>
+class, interface, or enum expected
+void greet(String name){
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Let us try with a class:</p>
+<pre>
+class Greet{
+    public void greet(String name){
+        System.out.println("Hello " + name);
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        (new Greet()).greet("Java");
+    }
+}
+</pre>
+<pre>
+Hello Java
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>While this works, what if we want another <strong>greet</strong> function that prints <strong>Hi ...</strong>?</p>
+<p>We can define another class with greet method.</p>
+<pre>
+class GreetHi{
+    public void greet(String name){
+        System.out.println("Hi " + name);
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        (new Greet()).greet("Java");
+        (new GreetHi()).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Functional interface to the rescue</h3>
+<p>Creating classes just to write different implementation of the same function is tedious. Java offeres a better way using <strong>interface</strong> and compiler generated
+<strong>anonymous</strong> class.</p>
+<p>First we define an interface where we declare the signature of the function:</p>
+<pre>
+interface Greet{
+    void greet(String name);
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Then, instead of defining classes that implements the interface, we use the <strong>new</strong> keyword on the interface and also provide the body of the function
+declared in the interface.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        (new Greet() {
+            public void greet(String name){
+                System.out.println("Hello " + name);
+            }
+        }).greet("Java");
+
+        (new Greet() {
+            public void greet(String name){
+                System.out.println("Hi " + name);
+            }
+        }).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Behind the scene</h3>
+<p>Java generates anonymous class that implements the interface. It use the implementation of the function we profided:</p>
+<pre>
+class Main$1 implemnets Greet{
+    public void greet(String name){
+        System.out.println("Hello " + name);
+    }
+}
+</pre>
+<p>Then this class is used to create the object on which the method is called:</p>
+<pre>
+(new Main$1).greet("Java");
+</pre>
+<p>But this is still tedious, creating the two objects just so that we can call the method.</p>
+</div>
+
+<div class="card">
+<h3>Lambda</h3>
+<p>What we can do is use <strong>-&gt;</strong> notation to define a function and assign it to a variable of an interface type. Compiler will generate the anonymous class
+implementing the interface and create an object so that we can call the method using the variable.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greet hello = (String name)->System.out.println("Hello " + name);
+        Greet hi = (String name)->System.out.println("Hi " + name);
+        hello.greet("Java");
+        hi.greet("Java");
+    }
+}
+
+interface Greet{
+    void greet(String name);
+}
+</pre>
+<p>We can even use casting to provide hint to the compiler regarding which interface we want to use:</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        ((Greet)((String name)->System.out.println("Hello " + name))).greet("Java");
+        ((Greet)((String name)->System.out.println("Hi " + name))).greet("Java");
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Functional interface</h3>
+<p>The <strong>@FunctionalInterface</strong> annotation ensures that we only declare <strong>one</strong> method whose body we specify using the lambda notation.</p>
+<pre>
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+}
+</pre>
+<p>Specifying another abstract method results in compilation error.</p>
+<pre>
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+    void greet();
+}
+</pre>
+<pre>
+Unexpected @FunctionalInterface annotation
+Greet is not a functional interface
+multiple non-overriding abstract methods found in interface Greet
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>If you do want to specify <strong>another</strong> function, then you will have to provide an implementation and mark the function as <strong>default</strong>, that
+is the function has default implementation which is to be used to generate the anonymous class.</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greet h = (String name)->System.out.println("Hello " + name);
+        h.greet("Java");
+        h.greet();
+    }
+}
+
+@FunctionalInterface
+interface Greet{
+    void greet(String name);
+    default void greet(){
+        System.out.println("Hello");
+    }
+}
+</pre>
+<pre>
+Hello Java
+Hello
+</pre>
+</div>
+
+<hr>
+
+<div class="card">
 <h3>Declaring class with placeholder for types</h3>
 <pre>
 class Cup&lt;T&gt;{
@@ -1247,191 +1435,7 @@ sipping plain tea
 
 <hr>
 
-<div class="card">
-<h3>No standalone functions but</h3>
-<p>We cannot write standalone function in Java</p>
-<pre>
-void greet(String name){
-    System.out.println("Hello " + name);
-}
-</pre>
-<pre>
-class, interface, or enum expected
-void greet(String name){
-</pre>
-</div>
 
-<div class="card">
-<h3>...</h3>
-<p>Let us try with a class:</p>
-<pre>
-class Greet{
-    public void greet(String name){
-        System.out.println("Hello " + name);
-    }
-}
-
-class Main{
-    public static void main(String[] args) {
-        (new Greet()).greet("Java");
-    }
-}
-</pre>
-<pre>
-Hello Java
-</pre>
-</div>
-
-<div class="card">
-<h3>...</h3>
-<p>While this works, what if we want another <strong>greet</strong> function that prints <strong>Hi ...</strong>?</p>
-<p>We can define another class with greet method.</p>
-<pre>
-class GreetHi{
-    public void greet(String name){
-        System.out.println("Hi " + name);
-    }
-}
-
-class Main{
-    public static void main(String[] args) {
-        (new Greet()).greet("Java");
-        (new GreetHi()).greet("Java");
-    }
-}
-</pre>
-</div>
-
-<div class="card">
-<h3>Functional interface to the rescue</h3>
-<p>Creating classes just to write different implementation of the same function is tedious. Java offeres a better way using <strong>interface</strong> and compiler generated
-<strong>anonymous</strong> class.</p>
-<p>First we define an interface where we declare the signature of the function:</p>
-<pre>
-interface Greet{
-    void greet(String name);
-}
-</pre>
-</div>
-
-<div class="card">
-<h3>...</h3>
-<p>Then, instead of defining classes that implements the interface, we use the <strong>new</strong> keyword on the interface and also provide the body of the function
-declared in the interface.</p>
-<pre>
-class Main{
-    public static void main(String[] args) {
-        (new Greet() {
-            public void greet(String name){
-                System.out.println("Hello " + name);
-            }
-        }).greet("Java");
-
-        (new Greet() {
-            public void greet(String name){
-                System.out.println("Hi " + name);
-            }
-        }).greet("Java");
-    }
-}
-</pre>
-</div>
-
-<div class="card">
-<h3>Behind the scene</h3>
-<p>Java generates anonymous class that implements the interface. It use the implementation of the function we profided:</p>
-<pre>
-class Main$1 implemnets Greet{
-    public void greet(String name){
-        System.out.println("Hello " + name);
-    }
-}
-</pre>
-<p>Then this class is used to create the object on which the method is called:</p>
-<pre>
-(new Main$1).greet("Java");
-</pre>
-<p>But this is still tedious, creating the two objects just so that we can call the method.</p>
-</div>
-
-<div class="card">
-<h3>Lambda</h3>
-<p>What we can do is use <strong>-&gt;</strong> notation to define a function and assign it to a variable of an interface type. Compiler will generate the anonymous class
-implementing the interface and create an object so that we can call the method using the variable.</p>
-<pre>
-class Main{
-    public static void main(String[] args) {
-        Greet hello = (String name)->System.out.println("Hello " + name);
-        Greet hi = (String name)->System.out.println("Hi " + name);
-        hello.greet("Java");
-        hi.greet("Java");
-    }
-}
-
-interface Greet{
-    void greet(String name);
-}
-</pre>
-<p>We can even use casting to provide hint to the compiler regarding which interface we want to use:</p>
-<pre>
-class Main{
-    public static void main(String[] args) {
-        ((Greet)((String name)->System.out.println("Hello " + name))).greet("Java");
-        ((Greet)((String name)->System.out.println("Hi " + name))).greet("Java");
-    }
-}
-</pre>
-</div>
-
-<div class="card">
-<h3>Functional interface</h3>
-<p>The <strong>@FunctionalInterface</strong> annotation ensures that we only declare <strong>one</strong> method whose body we specify using the lambda notation.</p>
-<pre>
-@FunctionalInterface
-interface Greet{
-    void greet(String name);
-}
-</pre>
-<p>Specifying another abstract method results in compilation error.</p>
-<pre>
-@FunctionalInterface
-interface Greet{
-    void greet(String name);
-    void greet();
-}
-</pre>
-<pre>
-Unexpected @FunctionalInterface annotation
-Greet is not a functional interface
-multiple non-overriding abstract methods found in interface Greet
-</pre>
-</div>
-<div class="card">
-<h3>...</h3>
-<p>If you do want to specify <strong>another</strong> function, then you will have to provide an implementation and mark the function as <strong>default</strong>, that
-is the function has default implementation which is to be used to generate the anonymous class.</p>
-<pre>
-class Main{
-    public static void main(String[] args) {
-        Greet h = (String name)->System.out.println("Hello " + name);
-        h.greet("Java");
-        h.greet();
-    }
-}
-
-@FunctionalInterface
-interface Greet{
-    void greet(String name);
-    default void greet(){
-        System.out.println("Hello");
-    }
-}
-</pre>
-<pre>
-Hello Java
-Hello
-</pre>
-</div>
 
 
 <div class="card" style="clear:both">
