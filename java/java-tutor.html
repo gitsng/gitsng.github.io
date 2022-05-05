@@ -964,7 +964,7 @@ Hello
 <hr>
 
 <div class="card">
-<h3>Declaring class with placeholder for types</h3>
+<h3>Generics or declaring class with placeholder for types</h3>
 <pre>
 class Cup&lt;T&gt;{
     private T item;
@@ -982,7 +982,7 @@ class Cup&lt;T&gt;{
 
 <div class="card">
 <h3>Using a generic class by specifying a type for the placeholder</h3>
-<p>To create an instance of <strong>Cup</strong> or to declare a variable of type <strong>Cup</strong>, we have to specify a concrete <strong>type</strong> for the
+<p>To <strong>create an instance</strong> of <strong>Cup</strong> or to <strong>declare a variable</strong> of type <strong>Cup</strong>, we have to specify a concrete <strong>type</strong> for the
 <strong>type</strong> placeholder <strong>T</strong>.</p>
 <p>Suppose we have these two classes:</p>
 <pre>
@@ -1008,16 +1008,18 @@ class Coffee{
 class Main {
     public static void main(String[] args) {
         Cup&lt;Tea&gt; t = new Cup&lt;Tea&gt;();
-        Tea tea = new Tea();
-        t.put(tea);
+        t.put(new Tea());
         System.out.println(t.get());
 
         Cup&lt;Coffee&gt; c = new Cup&lt;Coffee&gt;();
-        Coffee coffee = new Coffee();
-        c.put(coffee);
+        c.put(new Coffee());
         System.out.println(c.get());
     }
 }
+</pre>
+<pre>
+Tea
+Coffee
 </pre>
 </div>
 
@@ -1050,6 +1052,35 @@ t.put(coffee);
 </div>
 
 <div class="card">
+<h3>Constructor</h3>
+<p>This is just a function with parameter used to declare the class </p>
+<pre>
+class Cup&lt;T&gt;{
+    private T item;
+
+    public Cup(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+</pre>
+<p>To create the object, we specify a specific type for the class parameter and then pass object of that class parameter type to the constructor.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;(new Tea());
+        Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;(new Coffee());
+        System.out.println(teaCup.get());
+        System.out.println(coffeeCup.get());
+    }
+}
+</pre>
+</div>
+
+<div class="card">
 <h3>Generic type and polymorphism</h3>
 <p>When we use the concrete type <strong>Cup&lt;Tea&gt;</strong>, the <strong>put</strong> becomes <strong>put(Tea item)</strong> and we can pass objects of type
 <strong>Tea</strong> or objects which are subtypes of <strong>Tea</strong>.</p>
@@ -1066,6 +1097,290 @@ class Main {
         IcedTea icedTea = new IcedTea();
         t.put(icedTea);
         System.out.println(t.get());
+    }
+}
+</pre>
+<pre>
+Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>However, when assigning</h3>
+<p>If we have variable of a generic class of specific type A, we cannot assign an object of that generic type with subtype of A.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; t = new Cup&lt;IcedTea&gt;();
+        IcedTea icedTea = new IcedTea();
+        t.put(icedTea);
+        System.out.println(t.get());
+    }
+}
+</pre>
+<pre>
+incompatible types: Cup&lt;IcedTea&gt; cannot be converted to Cup&lt;Tea&gt;
+Cup&lt;Tea&gt; t = new Cup&lt;IcedTea&gt;();
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>But we can assign an object of subclass of that generic type with parameter type A.</p>
+<pre>
+class BigCup&lt;T&gt; extends Cup&lt;T&gt;{
+}
+
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; t = new BigCup&lt;Tea&gt;();
+        IcedTea icedTea = new IcedTea();
+        t.put(icedTea);
+        System.out.println(t.get());
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Relaxation of the assignment rule with wildcard</h3>
+<p>During <strong>declaring</strong> a variable of a parameterized class, we can use the wildcard <strong>?</strong> instead of specifying a concrete type for the 
+    type placeholder. Then we can assign object of the generic class having anything as value for the type placeholder.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;?&gt; t = new Cup&lt;Tea&gt;();
+        Cup&lt;?&gt; c = new Cup&lt;Coffee&gt;();
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>But the <strong>direct</strong> assignment is <strong>useless</strong>. When we try to call <strong>put</strong>, we get a very cryptic error message.</p>
+<pre>
+Cup&lt;?&gt; t = new Cup&lt;Tea&gt;();
+t.put(new Tea());
+</pre>
+<pre>
+incompatible types: Tea cannot be converted to CAP#1
+t.put(new Tea());
+where CAP#1 is a fresh type-variable:
+CAP#1 extends Object from capture of ?
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>There is a workaround using <strong>indirect</strong> assignment.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        teaCup.put(new Tea());
+        Cup&lt;?&gt; cup = teaCup;
+        System.out.println(cup.get());
+
+        Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;();
+        coffeeCup.put(new Coffee());
+        cup = coffeeCup;
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+Tea
+Coffee
+</pre>
+</div>
+
+<div class="card">
+<h3>Wildcard during variable declaration and assignment with restriction on the type</h3>
+<p>When declaring a variable of a generic class, we can use the wildcard <strong>? extends specific type A</strong>. Then we can assign an object of that generic type 
+    with A or subtype of A as its parameter.</p>
+<p>Of course, we have seen that direct assignment is useless, so we will use indirect assignment.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        teaCup.put(new Tea());
+        Cup&lt;? extends Tea&gt; cup = teaCup;
+        System.out.println(cup.get());
+
+        Cup&lt;IcedTea&gt; icedTeaCup = new Cup&lt;IcedTea&gt;();
+        icedTeaCup.put(new IcedTea());
+        cup = icedTeaCup;
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+Tea
+Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Trying to assign object of <strong>Cup&lt;Coffee&gt;</strong> type results in compilation error.</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;();
+        Cup&lt;? extends Tea&gt; cup = coffeeCup;
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+incompatible types: Cup&lt;Coffee&gt; cannot be converted to Cup&lt;? extends Tea&gt;
+Cup&lt;? extends Tea&gt; cup = coffeeCup;
+</pre>
+</div>
+
+<div class="card">
+<h3>Wildcard using super</h3>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        teaCup.put(new IcedTea());
+        Cup&lt;? super IcedTea&gt; cup = teaCup;
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        teaCup.put(new Tea());
+        Cup&lt;? super IcedTea&gt; cup = teaCup;
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+Tea
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        Cup&lt;? super IcedTea&gt; cup = teaCup;
+        cup.put(new IcedTea());
+        System.out.println(cup.get());
+    }
+}
+</pre>
+<pre>
+Iced tea
+</pre>
+</div>
+
+<div class="card">
+<h3>Generic interface</h3>
+<p>Not only class, even interface can be defined which takes a type as parameter.</p>
+<pre>
+interface Sipper&lt;T&gt;{
+    void pour(T t);
+    T sip();
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Implementing a generic interface</h3>
+<p>We can write a generic class which implemnets the generic interface.</p>
+<p>Our class <strong>Cup</strong> can be written as:</p>
+<pre>
+class Cup&lt;T&gt; implements Sipper&lt;T&gt;{
+    private T item;
+
+    public void pour(T item){
+        this.item = item;
+    }
+
+    public T sip(){
+        return item;
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;Tea&gt; t = new Cup&lt;Tea&gt;();
+        t.pour(new Tea());
+        System.out.println(t.sip());
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Generic type with wildcard in parameterized type as function parameter</h3>
+<p>We have the following generic class:</p>
+<pre>
+class Cup&lt;T&gt;{
+    private T item;
+
+    public void put(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>We have the following classes that we will use as type parameter:</p>
+<pre>
+class Tea{
+    public String toString(){
+        return "Tea";
+    }
+}
+
+class IcedTea extends Tea{
+    public String toString(){
+        return "Iced tea";
+    }
+}
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>We can define a method whose parameters are objects of generic class <strong>Cup</strong> with wildcard in the type parameter:</p>
+<pre>
+class Main {
+    public static void pourInto(Cup&lt;? super Tea&gt; newCup, Cup&lt;? extends Tea&gt; fromCup){
+        newCup.put(fromCup.get());
+    }
+}
+</pre>
+<p>We can have the following:</p>
+<pre>
+class Main {
+    public static void main(String[] args) {
+        Cup&lt;IcedTea&gt; icedTeaCup = new Cup&lt;IcedTea&gt;();
+        icedTeaCup.put(new IcedTea());
+        Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
+        pourInto(teaCup, icedTeaCup);
+        System.out.println(teaCup.get());
     }
 }
 </pre>
