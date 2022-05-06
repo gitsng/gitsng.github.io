@@ -1062,6 +1062,10 @@ class Cup&lt;T&gt;{
         this.item = item;
     }
 
+    public void put(T item){
+        this.item = item;
+    }
+
     public T get(){
         return item;
     }
@@ -1172,20 +1176,53 @@ CAP#1 extends Object from capture of ?
 </div>
 
 <div class="card">
-<h3>...</h3>
-<p>There is a workaround using <strong>indirect</strong> assignment.</p>
+<h3>The problem</h3>
+<p>When we use the wildcard, what happens is something like this:</p>
 <pre>
+class Cup{
+    
+    public void put(? item){
+    }
+
+    public ? get(){
+        return item;
+    }
+}
+</pre>
+<p>For the <strong>put</strong>function, <strong>?</strong> stands for some <strong>unknown</strong> type. Any parameter we pass to <strong>put</strong> would have 
+    to be a subtype of this unknown type. Since we don't know what type that is, we cannot pass anything in.</p>
+<p>For the function <strong>get</strong>, the result is of <strong>unknown</strong> type, but we can still calll it because it will be treated as type <strong>Object</strong>.</p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+
+<pre>
+class Cup&lt;T&gt;{
+    private T item;
+
+    public void put(T item){
+        this.item = item;
+    }
+
+    public T get(){
+        return item;
+    }
+}
+
 class Main {
     public static void main(String[] args) {
         Cup&lt;Tea&gt; teaCup = new Cup&lt;Tea&gt;();
         teaCup.put(new Tea());
         Cup&lt;?&gt; cup = teaCup;
-        System.out.println(cup.get());
+        Object tea = cup.get();
+        System.out.println(tea);
 
         Cup&lt;Coffee&gt; coffeeCup = new Cup&lt;Coffee&gt;();
         coffeeCup.put(new Coffee());
         cup = coffeeCup;
-        System.out.println(cup.get());
+        Object coffee = cup.get();
+        System.out.println(coffee);
     }
 }
 </pre>
@@ -1194,6 +1231,8 @@ Tea
 Coffee
 </pre>
 </div>
+
+
 
 <div class="card">
 <h3>Wildcard during variable declaration and assignment with restriction on the type</h3>
@@ -1759,10 +1798,13 @@ sipping plain tea
 <li><a href="https://unicode-table.com/en/">Unicode table</a></li>
 <li><a href="https://beginnersbook.com/2017/10/java-8-interface-changes-default-method-and-static-method/">Java 8 Interface Changes – default method and static method</a></li>
 <li><a href="https://www.javatpoint.com/java-8-functional-interfaces">Java Functional Interfaces</a></li>
-<li><a href="ggg">hhhh</a></li>
-
-<li><a href="ggg">hhhh</a></li>
-
+<li><a href="https://medium.com/javarevisited/how-to-choose-upper-lower-bounds-in-java-generics-52bfdcfd17c2">How to choose Upper & Lower bounds in Java Generics?</a></li>
+<li><a href="https://docs.oracle.com/javase/tutorial/extra/generics/index.html">Lesson: Generics</a></li>
+<li><a href="https://docs.oracle.com/javase/tutorial/java/generics/index.html">Lesson: Generics (Updated)</a></li>
+<li><a href="https://javarevisited.blogspot.com/2012/04/what-is-bounded-and-unbounded-wildcards.html?m=1">What is bounded and unbounded wildcards in Generics Java? Example</a></li>
+<li><a href="https://javarevisited.blogspot.com/2011/09/generics-java-example-tutorial.html?m=1">The Ultimate Guide of Generics in Java - Examples</a></li>
+<li><a href="https://javarevisited.blogspot.com/2012/06/10-interview-questions-on-java-generics.html?m=1">10 Interview Questions on Java Generics for Programmer and Developers</a></li>
+<li><a href="ggg"></a></li>
 </ul>
 </div>
 
