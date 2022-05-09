@@ -650,7 +650,7 @@ class Main{
 
 <div class="card">
 <h3>...</h3>
-<p><strong>Note 1</strong> static method in interface is not inherited by a class that implements that interface.</p>
+<p><strong>Note</strong> static method in interface is not inherited by a class that implements that interface.</p>
 <pre>
 class Welcome implements Greeter{
 
@@ -678,7 +678,8 @@ interface Greeter{
     }
 }
 </pre>
-<p>Unlike <strong>static</strong> method in interface, <strong>default</strong> method cannot be called using the interface name. An object is required.</p>
+<p>Unlike <strong>static</strong> method in interface, <strong>default</strong> method <strong>cannot</strong> be called using the interface name. 
+    An <strong>object</strong> of some class that implements that interface is required.</p>
 <p>The default method is <strong>inherited</strong> by the implementing class and we can use the object of the implementing class to call the method.</p>
 <pre>
 class Welcome implements Greeter{
@@ -769,6 +770,80 @@ class Main{
 will be used.</p>
 <pre>
 welcome
+</pre>
+</div>
+
+<div class="card">
+<h3>Calling the default function in the interface</h3>
+<p>We can try using then <strong>super</strong>, but that works only for <strong>class</strong> inheritance.</p>
+<pre>
+class Welcome implements Greeter{
+    @Override
+    public void greet(){
+        super.greet();
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        Welcome w = new Welcome();
+        w.greet();
+    }
+}
+</pre>
+<p>For <strong>interface</strong>, we will get compiler error:</p>
+<pre>
+cannot find symbol
+super.greet();
+symbol: method greet()
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>We need a workaround. We have to use <strong>interface-name.super</strong> to refer to the method defined inside the interface.</p>
+<pre>
+class Welcome implements Greeter{
+    @Override
+    public void greet(){
+        Greeter.super.greet();
+    }
+}
+</pre>
+<p>Now it works.</p>
+<pre>
+greetings
+</pre>
+<p>This works even if our class implements two interfaces having the same method.</p>
+<pre>
+class Welcome implements Greeter, Hello{
+    @Override
+    public void greet(){
+        Greeter.super.greet();
+        Hello.super.greet();
+    }
+}
+</pre>
+<pre>
+greetings
+hello
+</pre>
+</div>
+
+<hr>
+<div class="card">
+<h3>Method reference with interface</h3>
+<p>We can only specify <strong>abstract</strong> methods inside interface. If we specify a body, we get compilation error.</p>
+<pre>
+interface Greeter{
+    void greet(){
+        System.out.println("hello");
+    }
+}
+</pre>
+<pre>
+interface abstract methods cannot have body
+void greet(){
 </pre>
 </div>
 
@@ -960,6 +1035,8 @@ Hello Java
 Hello
 </pre>
 </div>
+
+
 
 <hr>
 
@@ -1792,11 +1869,14 @@ sipping plain tea
 
 
 
+
+
 <div class="card" style="clear:both">
 <h3>Reference</h3>
 <ul>
 <li><a href="https://unicode-table.com/en/">Unicode table</a></li>
 <li><a href="https://beginnersbook.com/2017/10/java-8-interface-changes-default-method-and-static-method/">Java 8 Interface Changes – default method and static method</a></li>
+<li><a href="https://www.javatpoint.com/java-8-method-reference">Java Method References</a></li>
 <li><a href="https://www.javatpoint.com/java-8-functional-interfaces">Java Functional Interfaces</a></li>
 <li><a href="https://medium.com/javarevisited/how-to-choose-upper-lower-bounds-in-java-generics-52bfdcfd17c2">How to choose Upper & Lower bounds in Java Generics?</a></li>
 <li><a href="https://docs.oracle.com/javase/tutorial/extra/generics/index.html">Lesson: Generics</a></li>
