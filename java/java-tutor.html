@@ -831,24 +831,7 @@ hello
 </div>
 
 <hr>
-<div class="card">
-<h3>Method reference with interface</h3>
-<p>We can only specify <strong>abstract</strong> methods inside interface. If we specify a body, we get compilation error.</p>
-<pre>
-interface Greeter{
-    void greet(){
-        System.out.println("hello");
-    }
-}
-</pre>
-<pre>
-interface abstract methods cannot have body
-void greet(){
-</pre>
-</div>
 
-
-<hr>
 
 <div class="card">
 <h3>No standalone functions but</h3>
@@ -1036,7 +1019,160 @@ Hello
 </pre>
 </div>
 
+<hr>
 
+<div class="card">
+<h3>Method reference with interface to static method</h3>
+<p>If we have a functional interface, we can assign a <strong>static</strong> method from a class or interface. When we then call the functional interface method, the
+assigned function is executed.</p>
+<pre>
+interface Greeter{
+    void greet();
+}
+
+interface Hello{
+    static void hello(){
+        System.out.println("hello");
+    }
+}
+</pre>
+<p>Note that <strong>greet</strong> and <strong>hello</strong> has same signature. So we can do this:</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greeter g = Hello::hello;
+        g.greet();
+    }
+}
+</pre>
+<pre>
+hello
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Same example with static function in class.</p>
+<pre>
+class Hello{
+    public static void hello(){
+        System.out.println("hi");
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        Greeter g = Hello::hello;
+        g.greet();
+    }
+}
+</pre>
+<pre>
+hi
+</pre>
+</div>
+
+<div class="card">
+<h3>Reference to class instance method</h3>
+<p>Here we have to use the instance on which the method will be called.</p>
+<pre>
+class Welcome{
+    private String welcomePhrase;
+    public Welcome(String welcomePhrase){
+        this.welcomePhrase = welcomePhrase;
+    }
+    public void hello(){
+        System.out.println(welcomePhrase);
+    }
+}
+
+class Main{
+    public static void main(String[] args) {
+        Welcome w1 = new Welcome("hello");
+        Greeter g1 = w1::hello;
+        g1.greet();
+        w1 = new Welcome("hi");
+        g1.greet();
+    }
+}
+</pre>
+<pre>
+hello
+hello
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>What is happening? Well, once we use <strong>w1::hello</strong>, g1 use the Welcome object assigned to w1 at that moment, which has the phrase <strong>hello</strong>.</p>
+<p>Later, even if we assign a new instance to w1, g1 still use the old instance of the Welcome object.</p>
+<p>But if we do a re-assignment, then</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Welcome w1 = new Welcome("hello");
+        Greeter g1 = w1::hello;
+        g1.greet();
+        w1 = new Welcome("hi");
+        g1 = w1::hello;
+        g1.greet();
+    }
+}
+</pre>
+<pre>
+hello
+hi
+</pre>
+</div>
+
+<div class="card">
+<h3>Reference to constructor to create object</h3>
+<p>Consider this class</p>
+<pre>
+class Welcome{
+    private String welcomePhrase;
+    public Welcome(String welcomePhrase){
+        this.welcomePhrase = welcomePhrase;
+    }
+    public void hello(){
+        System.out.println(welcomePhrase);
+    }
+}
+</pre>
+<p>Here we see that the constructor method takes a String object. So if we want to refer to the constructor function, we need something that takes a String and return
+    object of type Welcome. So here is our functional interface.
+</p>
+<pre>
+interface Greeter{
+    Welcome create(String phrase);
+}
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>But what do we assign? It is <strong>not</strong> the</p>
+<pre>
+Greeter g = Welcome::Welcome;
+</pre>
+<p>This results in compilation error</p>
+<pre>
+cannot find symbol
+symbol:   method Welcome(String)
+location: class Welcome
+</pre>
+<p>The constructor method is referred by the function name <strong>new</strong>, so we use</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        Greeter g = Welcome::new;
+        Welcome w = g.create("hello");
+        w.hello();
+    }
+}
+</pre>
+<pre>
+hello
+</pre>
+</div>
 
 <hr>
 
@@ -1866,8 +2002,241 @@ sipping plain tea
 
 <hr>
 
+<div class="card">
+<h3>Generic interface and lambda</h3>
+<p>Let us consider a simple functional interface and a lambda expression which will work for a specific type only.</p>
+<pre>
+interface IntChecker{
+    boolean check(int n);
+}
 
+interface DoubleChecker{
+    boolean check(double n);
+}
+</pre>
+</div>
 
+<div class="card">
+<h3>...</h3>
+<p>We use these as follows:</p>
+<pre>
+class Main{
+    public static void main(String[] args) {
+        IntChecker numberChecker = (int  n)-&gt;{
+            System.out.println("checking if " + n + " is greater than 3");
+            return n &gt; 3;
+        };
+        System.out.println(numberChecker.check(4));
+
+        DoubleChecker doubleChecker = (double d)-&gt;{
+            System.out.println("checking if " + d + " is greater than 3.5");
+            return d &gt; 3.5;
+        };
+        System.out.println(doubleChecker.check(4.0d));
+    }
+}
+</pre>
+<pre>
+checking if 4 is greater than 3
+true
+checking if 4.0 is greater than 3.5
+true
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>We are writing the same thing with different types so let us use the type as parameter for the interface.</p>
+<pre>
+interface Checker&lt;T extends Number&gt;{
+    boolean check(T n);
+}
+
+class Main{
+    public static void main(String[] args) {
+        Checker&lt;Integer&gt; numberChecker = (Integer  n)-&gt;{
+            System.out.println("checking if " + n + " is greater than 3");
+            return n &gt; 3;
+        };
+        System.out.println(numberChecker.check(4));
+
+        Checker&lt;Double&gt; doubleChecker = (Double d)-&gt;{
+            System.out.println("checking if " + d + " is greater than 3.5");
+            return d &gt; 3.5;
+        };
+        System.out.println(doubleChecker.check(4.0d));
+    }
+}
+</pre>
+</div>
+
+<div class="card">
+<h3>Java functional interface - Predicate</h3>
+<p>We do not have to write the <strong>Checker</strong> interface because Java already provides one, called <strong>Predicate</strong> which is in the package
+<strong>java.util.function</strong>.</p>
+<p>We can simply write:</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+        Predicate&lt;Integer&gt; numberChecker = (Integer  n)-&gt;{
+            System.out.println("checking if " + n + " is greater than 3");
+            return n &gt; 3;
+        };
+        System.out.println(numberChecker.test(4));
+
+        Predicate&lt;Double&gt; doubleChecker = (Double d)-&gt;{
+            System.out.println("checking if " + d + " is greater than 3.5");
+            return d &gt; 3.5;
+        };
+        System.out.println(doubleChecker.test(4.0d));
+    }
+}
+</pre>
+<pre>
+checking if 4 is greater than 3
+true
+checking if 4.0 is greater than 3.5
+true
+</pre>
+</div>
+
+<div class="card">
+<h3>The Function interface</h3>
+<p>This represents functions that takes a single argument. To run the code, call the <strong>apply</strong> method.</p>
+<pre>
+Function&lt;D, R&gt;{
+    R apply(D);
+}
+</pre>
+<p>where <strong>D</strong> is the placeholder for the type we want to use as input to our function and <strong>R</strong> is the placeholder for the type we want
+to return from our function.</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+       Function&lt;Integer, Double&gt; f = (Integer n) -&gt;2.5d * n;
+       System.out.println(f.apply(3));
+    }
+}
+</pre>
+<pre>
+7.5
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>Note the placeholders for the interface <strong>Function</strong>. You have to specify a type for input and a type for input. So if your function <strong>does not</strong>
+return a value, you cannot do the following:</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+       Function&lt;Integer&gt; f = (Integer n) -&gt;system.out.println(n);
+       f.apply(3);
+    }
+}
+</pre>
+<pre>
+wrong number of type arguments; required 2
+Function&lt;Integer&gt; f = (Integer n) -&gt;system.out.println(n);
+</pre>
+</div>
+<div class="card">
+<h3>Representing nothing</h3>
+<p>To represent <strong>nothing</strong>, you have to use the type <strong>Void</strong> and then return <strong>null</strong> for result or take <strong>null</strong>
+    as input.</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+       Function&lt;Integer, Void&gt; f = (Integer n) -&gt;{
+           System.out.println(n);
+           return null;
+       };
+       f.apply(3);
+    }
+}
+</pre>
+<pre>
+3
+</pre>
+</div>
+<div class="card">
+<h3>...</h3>
+<p>Here the function returns <strong>Integer</strong> but does not accept any input.</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+       Function&lt;Void, Integer&gt; f = (Void d) -&gt;{
+           return 4;
+       };
+       System.out.println(f.apply(null));
+    }
+}
+</pre>
+<pre>
+4
+</pre>
+</div>
+
+<div class="card">
+<h3>Returning lambda</h3>
+<p>Say we have this lambda expression:</p>
+<pre>
+(Integer v)-&gt; r * (double)v;
+</pre>
+<p>For a moment, ignore where <strong>r</strong> comes from. So if we want to assign this to a variable, we could use the concrete type
+<strong>Function&lt;Integer, Double&gt;</strong> because the function accepts Integer and returns Double.</p>
+<p>So if we want to return this lambda expression from another lambda expression that accepts <strong>Double</strong> as input, the output type will be 
+    <strong>Function&lt;Integer, Double&gt;</strong></p>
+<pre>
+Function&lt;Double, Function&lt;Integer, Double&gt;&gt; rate = (Double r) -&gt;{
+    Function&lt;Integer, Double&gt; rfunc = (Integer v)-&gt; r * (double)v;
+    return rfunc;
+};
+</pre>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Since the lambda expression <strong>(Integer v)-&gt; r * (double)v;</strong> is defined <strong>inside</strong> the outer lambda expression
+<strong>(Double r) -&gt;{</strong>, the inner one can access the variables defined in the outer one. In fact, the inner one keeps a copy of the value.</p>
+<p>So when we call the inner one:</p>
+<pre>
+rate.apply(2.5d)
+</pre>
+<p>The <strong>r</strong> has the value of <strong>2.5</strong> and we get a lambda as if:</p>
+<pre>
+Function&lt;Integer, Double&gt; rfunc = (Integer v)-&gt; 2.5 * (double)v;
+</pre>
+<p>Now when we call this one with value of <strong>4</strong>, the result is <strong>10.0</strong></p>
+</div>
+
+<div class="card">
+<h3>...</h3>
+<p>Here is the full code</p>
+<pre>
+import java.util.function.*;
+
+class Main{
+    public static void main(String[] args) {
+       Function&lt;Double, Function&lt;Integer, Double&gt;&gt; rate = (Double r) -&gt;{
+        Function&lt;Integer, Double&gt; rfunc = (Integer v)-&gt; r * (double)v;
+           return rfunc;
+       };
+       Function&lt;Integer, Double&gt; calculateRate = rate.apply(2.5d);
+       System.out.println(calculateRate.apply(4));
+    }
+}
+</pre>
+</div>
 
 
 
@@ -1884,7 +2253,12 @@ sipping plain tea
 <li><a href="https://javarevisited.blogspot.com/2012/04/what-is-bounded-and-unbounded-wildcards.html?m=1">What is bounded and unbounded wildcards in Generics Java? Example</a></li>
 <li><a href="https://javarevisited.blogspot.com/2011/09/generics-java-example-tutorial.html?m=1">The Ultimate Guide of Generics in Java - Examples</a></li>
 <li><a href="https://javarevisited.blogspot.com/2012/06/10-interview-questions-on-java-generics.html?m=1">10 Interview Questions on Java Generics for Programmer and Developers</a></li>
-<li><a href="ggg"></a></li>
+<li><a href="https://www.javatpoint.com/java-predicate-interface">Java Predicate Interface</a></li>
+<li><a href="https://www.javatpoint.com/java-function-interface">Java Function Interface</a></li>
+<!--
+goog: java how to return Void
+-->
+<li><a href="https://stackoverflow.com/questions/2408626/returning-a-void-object">returning a Void object</a></li>
 </ul>
 </div>
 
